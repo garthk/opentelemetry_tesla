@@ -43,8 +43,8 @@ defmodule OpenTelemetry.Tesla.MixProject do
       {:mox, "~> 1.0.0", only: :test, runtime: false},
       # versions for runtime dependencies deliberately set low and loose:
       {:tesla, "~> 1.2"},
-      {:opentelemetry, "~> 0.5"},
-      {:opentelemetry_api, "~> 0.5"}
+      {:opentelemetry, "~> 0.6"},
+      {:opentelemetry_api, "~> 0.6"}
     ]
   end
 
