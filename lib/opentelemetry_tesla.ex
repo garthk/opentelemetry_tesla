@@ -7,9 +7,7 @@ defmodule OpenTelemetry.Tesla do
 end
 
 defmodule OpenTelemetry.Tesla.Middleware do
-  @moduledoc """
-  Tesla middleware for generating spans for outgoing requests.
-  """
+  @moduledoc false
 
   @behaviour Tesla.Middleware
 

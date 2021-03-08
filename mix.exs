@@ -58,10 +58,8 @@ defmodule OpenTelemetry.Tesla.MixProject do
 
   defp docs() do
     [
-      api_reference: true,
       authors: ["Garth Kidd"],
       canonical: "https://hex.pm/packages/#{@app}",
-      extras: [],
       main: @main,
       source_ref: "v#{@version}"
     ]
