@@ -2,9 +2,9 @@ name: Elixir CI
 
 on:
   push:
-    branches: [trunk]
+    branches: [main]
   pull_request:
-    branches: [trunk]
+    branches: [main]
 
 jobs:
   build:
@@ -20,7 +20,7 @@ jobs:
       - uses: gleam-lang/setup-erlang@v1.0.0
         with:
           otp-version: ${{matrix.otp}}
-      - uses: actions/setup-elixir@v1.2.0
+      - uses: erlef/setup-elixir@v1.6.0
         with:
           otp-version: ${{matrix.otp}}
           elixir-version: ${{matrix.elixir}}
