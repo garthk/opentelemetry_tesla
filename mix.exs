@@ -15,6 +15,7 @@ defmodule OpenTelemetry.Tesla.MixProject do
       dialyzer: dialyzer(),
       docs: docs(),
       elixir: "~> 1.8",
+      homepage_url: @repo,
       package: package(),
       preferred_cli_env: [
         coveralls: :test,
