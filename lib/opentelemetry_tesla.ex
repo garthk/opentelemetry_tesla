@@ -55,8 +55,6 @@ defmodule OpenTelemetry.Tesla.Middleware do
     query = URI.encode_query(env.query)
 
     [
-      # https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/http.md#common-attributes
-      # https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/http.md#http-client
       {"http.host", uri.host},
       {"peer.service", peer_service},
       {"http.method", upcase_method(env.method)},
