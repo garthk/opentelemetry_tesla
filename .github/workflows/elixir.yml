@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Elixir ${{matrix.elixir}} on OTP ${{matrix.otp}}
     strategy:
+      fail-fast: false
       matrix:
         # Earliest and latest supported of each, only, to avoid abusing GitHub's machinery:
         otp: ["21.3", "23.1"]
