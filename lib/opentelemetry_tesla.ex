@@ -25,29 +25,16 @@ defmodule OpenTelemetry.Tesla.Middleware do
       kind: :client
     } do
       headers = Propagator.text_map_inject([])
-
-      case Tesla.run(Tesla.put_headers(env, headers), next) do
-        {:ok, env} ->
-          env |> response_attributes() |> safe_attrs() |> Tracer.set_attributes()
-          env |> response_status() |> Tracer.set_status()
-          {:ok, env}
-
-        {:error, reason} ->
-          reason |> error_status() |> Tracer.set_status()
-          {:error, reason}
-      end
+      env |> Tesla.put_headers(headers) |> Tesla.run(next) |> set_attrs_and_status()
     end
   end
 
-  defp response_status(%Env{status: n}) when is_integer(n) and n >= 400,
-    do: {:status, 2, "status_code=#{n}"}
-
-  defp response_status(%Env{status: n}) when is_integer(n) and n >= 200,
-    do: {:status, 0, "OK"}
-
-  defp response_status(_), do: :undefined
-
-  defp error_status(_), do: {:status, 2, "an error occurred"}
+  defp set_attrs_and_status(result) do
+    result
+  after
+    result |> response_status() |> Tracer.set_status()
+    result |> response_attributes() |> safe_attrs() |> Tracer.set_attributes()
+  end
 
   @doc false
   def request_attributes(env, peer_service \\ nil) do
@@ -68,12 +55,25 @@ defmodule OpenTelemetry.Tesla.Middleware do
   end
 
   @doc false
-  def response_attributes(env) do
+  def response_attributes({:error, _}), do: []
+
+  def response_attributes({:ok, env}) do
     [
       {"http.status_code", env.status},
       {"http.response_content_length", safe_content_length(env)}
     ]
   end
+
+  @doc false
+  def response_status({:error, _reason}), do: {:status, 2, "an error occurred"}
+
+  def response_status({:ok, %Env{status: n}}) when is_integer(n) and n >= 400,
+    do: {:status, 2, "status_code=#{n}"}
+
+  def response_status({:ok, %Env{status: n}}) when is_integer(n) and n >= 200,
+    do: {:status, 0, "OK"}
+
+  def response_status(_), do: :undefined
 
   @methods for atom <- ~w[delete get head options patch post put trace]a,
                into: %{},

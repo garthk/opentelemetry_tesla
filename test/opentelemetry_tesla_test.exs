@@ -112,22 +112,47 @@ defmodule OpenTelemetry.TeslaTest do
                |> List.keyfind("http.path", 0)
     end
 
-    test "no content-length (in)" do
-      body = [?1, "23", ["4"]]
-
-      assert {"http.response_content_length", 4} =
-               %Env{body: body}
-               |> Middleware.response_attributes()
-               |> List.keyfind("http.response_content_length", 0)
-    end
-
-    test "no content-length (out)" do
+    test "no content-length in request headers" do
       body = [?1, "23", ["4"]]
 
       assert {"http.request_content_length", 4} =
                %Env{body: body}
                |> Middleware.request_attributes()
                |> List.keyfind("http.request_content_length", 0)
+    end
+
+    test "no content-length in response headers" do
+      body = [?1, "23", ["4"]]
+
+      assert {"http.response_content_length", 4} =
+               {:ok, %Env{body: body}}
+               |> Middleware.response_attributes()
+               |> List.keyfind("http.response_content_length", 0)
+    end
+  end
+
+  describe "span status" do
+    test "error" do
+      assert {:status, 2, "an error occurred"} = Middleware.response_status({:error, :reason})
+    end
+
+    test "2xx and 3xx" do
+      for status <- 200..399 do
+        assert {:status, 0, "OK"} = Middleware.response_status({:ok, %Env{status: status}})
+      end
+    end
+
+    test "4xx and 5xx" do
+      for status <- 400..599 do
+        assert {:status, 2, "status_code=" <> n} =
+                 Middleware.response_status({:ok, %Env{status: status}})
+
+        assert n == to_string(status)
+      end
+    end
+
+    test "other" do
+      assert :undefined = Middleware.response_status({:ok, %Env{status: 100}})
     end
   end
 
