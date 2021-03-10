@@ -11,6 +11,9 @@ config :opentelemetry, :resource,
     namespace: "service-namespace"
   ]
 
+# A normal config for :opentelemetry would set an exporter under otel_batch_processor.
+# Here, we're leaving it absent for test purposes.
+
 config :opentelemetry,
   tracer: :otel_tracer_default,
   processors: [otel_batch_processor: %{scheduled_delay_ms: scheduled_delay_ms}]

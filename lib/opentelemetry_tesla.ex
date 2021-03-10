@@ -20,10 +20,10 @@ defmodule OpenTelemetry.Tesla.Middleware do
     {peer_service, opts} = Keyword.pop(opts, :peer_service, nil)
     for {k, _} <- opts, do: raise(ArgumentError, "no such option: #{k}")
 
-    Tracer.with_span "HTTP #{upcase_method(env.method)}", %{
-      attributes: env |> request_attributes(peer_service) |> safe_attrs(),
-      kind: :client
-    } do
+    span_name = "HTTP " <> upcase_method(env.method)
+    attributes = env |> request_attributes(peer_service) |> safe_attrs()
+
+    Tracer.with_span span_name, %{attributes: attributes, kind: :client} do
       headers = Propagator.text_map_inject([])
       env |> Tesla.put_headers(headers) |> Tesla.run(next) |> set_attrs_and_status()
     end
