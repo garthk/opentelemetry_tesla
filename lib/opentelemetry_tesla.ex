@@ -65,13 +65,14 @@ defmodule OpenTelemetry.Tesla.Middleware do
   end
 
   @doc false
-  def response_status({:error, _reason}), do: {:status, 2, "an error occurred"}
+  def response_status({:error, _reason}),
+    do: OpenTelemetry.status(:error, "an error occurred")
 
   def response_status({:ok, %Env{status: n}}) when is_integer(n) and n >= 400,
-    do: {:status, 2, "status_code=#{n}"}
+    do: OpenTelemetry.status(:error, "status_code=#{n}")
 
   def response_status({:ok, %Env{status: n}}) when is_integer(n) and n >= 200,
-    do: {:status, 0, "OK"}
+    do: OpenTelemetry.status(:ok, "OK")
 
   def response_status(_), do: :undefined
 

@@ -85,7 +85,7 @@ defmodule OpenTelemetry.TeslaTest do
                name: "HTTP GET",
                parent_span_id: ^test_span_id,
                span_id: ^span_id,
-               status: {:status, 0, "OK"},
+               status: {:status, :ok, "OK"},
                trace_id: ^trace_id
              }
            ] = gather_spans(trace_id)
@@ -133,18 +133,19 @@ defmodule OpenTelemetry.TeslaTest do
 
   describe "span status" do
     test "error" do
-      assert {:status, 2, "an error occurred"} = Middleware.response_status({:error, :reason})
+      assert {:status, :error, "an error occurred"} =
+               Middleware.response_status({:error, :reason})
     end
 
     test "2xx and 3xx" do
       for status <- 200..399 do
-        assert {:status, 0, "OK"} = Middleware.response_status({:ok, %Env{status: status}})
+        assert {:status, :ok, "OK"} = Middleware.response_status({:ok, %Env{status: status}})
       end
     end
 
     test "4xx and 5xx" do
       for status <- 400..599 do
-        assert {:status, 2, "status_code=" <> n} =
+        assert {:status, :error, "status_code=" <> n} =
                  Middleware.response_status({:ok, %Env{status: status}})
 
         assert n == to_string(status)
