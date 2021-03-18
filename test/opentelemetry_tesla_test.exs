@@ -78,6 +78,9 @@ defmodule OpenTelemetry.TeslaTest do
     # Wait for the exporter. https://github.com/open-telemetry/opentelemetry-erlang/issues/218
     :timer.sleep(10)
 
+    {:ok, vsn} = :application.get_key(:opentelemetry_tesla, :vsn)
+    vsn = to_string(vsn)
+
     assert [
              %Span{
                attributes: attributes,
@@ -85,6 +88,7 @@ defmodule OpenTelemetry.TeslaTest do
                name: "HTTP GET",
                parent_span_id: ^test_span_id,
                span_id: ^span_id,
+               instrumentation_library: {:instrumentation_library, "opentelemetry_tesla", ^vsn},
                status: {:status, :ok, "OK"},
                trace_id: ^trace_id
              }

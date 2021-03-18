@@ -16,7 +16,10 @@ defmodule OpenTelemetry.Tesla.Middleware do
   require OpenTelemetry.Tracer, as: Tracer
   require :otel_propagator, as: Propagator
 
+  @impl true
   def call(%Env{} = env, next, opts) do
+    OpenTelemetry.register_application_tracer(:opentelemetry_tesla)
+
     {peer_service, opts} = Keyword.pop(opts, :peer_service, nil)
     for {k, _} <- opts, do: raise(ArgumentError, "no such option: #{k}")
 
