@@ -30,7 +30,11 @@ defmodule OpenTelemetry.Tesla.MixProject do
     ]
   end
 
-  def application, do: [extra_applications: [:logger]]
+  def application,
+    do: [
+      mod: {OpenTelemetry.Tesla.Application, []},
+      extra_applications: [:logger]
+    ]
 
   defp deps do
     [

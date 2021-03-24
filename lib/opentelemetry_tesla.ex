@@ -18,8 +18,6 @@ defmodule OpenTelemetry.Tesla.Middleware do
 
   @impl true
   def call(%Env{} = env, next, opts) do
-    OpenTelemetry.register_application_tracer(:opentelemetry_tesla)
-
     {peer_service, opts} = Keyword.pop(opts, :peer_service, nil)
     for {k, _} <- opts, do: raise(ArgumentError, "no such option: #{k}")
 
@@ -106,5 +104,15 @@ defmodule OpenTelemetry.Tesla.Middleware do
       {n, ""} -> n
       _ -> nil
     end
+  end
+end
+
+defmodule OpenTelemetry.Tesla.Application do
+  @moduledoc false
+  use Application
+  @impl true
+  def start(_type, _args) do
+    OpenTelemetry.register_application_tracer(:opentelemetry_tesla)
+    Supervisor.start_link([], strategy: :one_for_one)
   end
 end
