@@ -1,9 +1,14 @@
 defmodule TestClient do
   use Tesla
+
   plug Tesla.Middleware.Headers, [{"user-agent", inspect(__MODULE__)}]
   plug Tesla.Middleware.Compression, format: "gzip"
+
   # PUT IT LAST:
-  plug OpenTelemetry.Tesla.Middleware, peer_service: "peer"
+  plug OpenTelemetry.Tesla.Middleware,
+    peer_service: "peer",
+    propagator: :otel_propagator_http_w3c
+
   adapter MockAdapter
 end
 

@@ -14,19 +14,18 @@ defmodule OpenTelemetry.Tesla.Middleware do
   alias Tesla.Env
 
   require OpenTelemetry.Tracer, as: Tracer
-  require :otel_propagator, as: Propagator
 
   @impl true
   def call(%Env{} = env, next, opts) do
     {peer_service, opts} = Keyword.pop(opts, :peer_service, nil)
+    {propagator, opts} = Keyword.pop(opts, :propagator, nil)
     for {k, _} <- opts, do: raise(ArgumentError, "no such option: #{k}")
 
     span_name = "HTTP " <> upcase_method(env.method)
     attributes = env |> request_attributes(peer_service) |> safe_attrs()
 
     Tracer.with_span span_name, %{attributes: attributes, kind: :client} do
-      headers = Propagator.text_map_inject([])
-      env |> Tesla.put_headers(headers) |> Tesla.run(next) |> set_attrs_and_status()
+      env |> propagate(propagator) |> Tesla.run(next) |> set_attrs_and_status()
     end
   end
 
@@ -35,6 +34,16 @@ defmodule OpenTelemetry.Tesla.Middleware do
   after
     result |> response_status() |> Tracer.set_status()
     result |> response_attributes() |> safe_attrs() |> Tracer.set_attributes()
+  end
+
+  defp propagate(env, nil), do: env
+  defp propagate(env, false), do: env
+  defp propagate(env, true), do: propagate(env, :otel_propagator_http_w3c)
+
+  defp propagate(env, module) do
+    span_ctx = Tracer.current_span_ctx()
+    headers = module.inject(span_ctx)
+    Tesla.put_headers(env, headers)
   end
 
   @doc false

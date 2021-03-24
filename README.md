@@ -34,6 +34,23 @@ defmodule MyApp.MyPeer.Client do
 end
 ```
 
+If the client is for a peer service you trust with your propagation headers, set the `propagator`:
+
+```elixir
+defmodule MyApp.MyPeer.Client do
+  use Tesla
+
+  plug Tesla.Middleware.Headers, [{"user-agent", inspect(__MODULE__)}]
+  plug Tesla.Middleware.Compression, format: "gzip"
+  plug OpenTelemetry.Tesla.Middleware,
+    peer_service: "my_peer",
+    propagator: :otel_propagator_http_w3c
+end
+```
+
+Disable propagation implicitly by leaving `propagator` unset, or explicitly by setting it to
+`nil` or `false`. You can also use the default W3C propagator by setting it to `true`.
+
 ## Trace Span Attributes
 
 `OpenTelemetry.Tesla` sends the following trace span attributes, following the [OpenTelemetry Trace
